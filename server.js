@@ -1,51 +1,53 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// ================= HOME =================
+
+// Serve your app files
+app.use(express.static(__dirname));
+
+
+// Open app
 app.get("/", (req, res) => {
-  res.send("AI SERVER RUNNING ✔");
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// ================= IMAGE (TEST MODE) =================
+
+// Image test route
 app.post("/image", (req, res) => {
+
   const prompt = req.body.prompt;
 
   console.log("IMAGE PROMPT:", prompt);
 
-  if (!prompt) {
-    return res.json({ error: "No prompt sent" });
-  }
-
-  // TEST IMAGE (no AI yet, just proof system works)
-  return res.json({
+  res.json({
     result: "https://via.placeholder.com/512"
   });
+
 });
 
-// ================= VIDEO (TEST MODE) =================
+
+// Video test route
 app.post("/generate", (req, res) => {
+
   const prompt = req.body.prompt;
 
   console.log("VIDEO PROMPT:", prompt);
 
-  if (!prompt) {
-    return res.json({ error: "No prompt sent" });
-  }
-
-  // TEST VIDEO (no AI yet)
-  return res.json({
+  res.json({
     result: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
   });
+
 });
 
-// ================= START SERVER =================
+
 const PORT = process.env.PORT || 10000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log("Server running on port", PORT);
 });
