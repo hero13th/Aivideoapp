@@ -2,31 +2,33 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import Replicate from "replicate";
-import fs from "fs";
 
 dotenv.config();
 
 const app = express();
 
-// middleware
 app.use(cors());
 app.use(express.json());
 
-// static hosting
-app.use(express.static("."));
-app.use("/images", express.static("images"));
-app.use("/videos", express.static("videos"));
-
-// replicate setup
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN
+// ================= HEALTH CHECK =================
+app.get("/", (req, res) => {
+  res.send("AI Server is running ✔");
 });
 
+// ================= SAFE REPLICATE INIT =================
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN || ""
+});
 
-// ===================== IMAGE =====================
+// ================= IMAGE =================
 app.post("/image", async (req, res) => {
   try {
     const prompt = req.body.prompt;
+
+    if (!prompt) {
+      return res.status(400).json({ error: "No prompt provided" });
+    }
+
     console.log("IMAGE PROMPT:", prompt);
 
     const output = await replicate.run(
@@ -36,35 +38,29 @@ app.post("/image", async (req, res) => {
       }
     );
 
-    const imageUrl = output[0];
+    console.log("IMAGE OUTPUT:", output);
 
-    const img = await fetch(imageUrl);
-    const buffer = Buffer.from(await img.arrayBuffer());
+    const imageUrl = Array.isArray(output) ? output[0] : output;
 
-    if (!fs.existsSync("images")) fs.mkdirSync("images");
+    return res.json({
+      result: imageUrl
+    });
 
-    const fileName = `img_${Date.now()}.png`;
-
-    fs.writeFileSync(`images/${fileName}`, buffer);
-
-    const result =
-      `https://aivideoapp-wb8p.onrender.com/images/${fileName}`;
-
-    console.log("IMAGE RESULT:", result);
-
-    res.json({ result });
-
-  } catch (e) {
-    console.log("IMAGE ERROR:", e.message);
-    res.status(500).json({ error: e.message });
+  } catch (err) {
+    console.log("IMAGE ERROR:", err.message);
+    return res.status(500).json({ error: err.message });
   }
 });
 
-
-// ===================== VIDEO =====================
+// ================= VIDEO =================
 app.post("/generate", async (req, res) => {
   try {
     const prompt = req.body.prompt;
+
+    if (!prompt) {
+      return res.status(400).json({ error: "No prompt provided" });
+    }
+
     console.log("VIDEO PROMPT:", prompt);
 
     const output = await replicate.run(
@@ -74,32 +70,33 @@ app.post("/generate", async (req, res) => {
       }
     );
 
-    const videoUrl = output[0];
+    console.log("VIDEO OUTPUT:", output);
 
-    const video = await fetch(videoUrl);
-    const buffer = Buffer.from(await video.arrayBuffer());
+    let videoUrl = Array.isArray(output)
+      ? output[0]
+      : typeof output === "string"
+      ? output
+      : null;
 
-    if (!fs.existsSync("videos")) fs.mkdirSync("videos");
+    if (!videoUrl) {
+      return res.status(500).json({
+        error: "No video URL returned"
+      });
+    }
 
-    const fileName = `vid_${Date.now()}.mp4`;
+    return res.json({
+      result: videoUrl
+    });
 
-    fs.writeFileSync(`videos/${fileName}`, buffer);
-
-    const result =
-      `https://aivideoapp-wb8p.onrender.com/videos/${fileName}`;
-
-    console.log("VIDEO RESULT:", result);
-
-    res.json({ result });
-
-  } catch (e) {
-    console.log("VIDEO ERROR:", e.message);
-    res.status(500).json({ error: e.message });
+  } catch (err) {
+    console.log("VIDEO ERROR:", err.message);
+    return res.status(500).json({ error: err.message });
   }
 });
 
+// ================= START SERVER =================
+const PORT = process.env.PORT || 10000;
 
-// ===================== START SERVER =====================
-app.listen(3000, "0.0.0.0", () => {
-  console.log("Server running on port 3000");
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Server running on port", PORT);
 });

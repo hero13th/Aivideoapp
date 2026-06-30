@@ -1,71 +1,84 @@
-async function generateImage(){
+const API = "https://aivideoapp-wb8p.onrender.com";
 
-const prompt = document.getElementById("prompt").value;
+// ================= IMAGE =================
+async function generateImage() {
+  const prompt = document.getElementById("prompt").value.trim();
 
-const result = document.getElementById("result");
+  if (!prompt) {
+    alert("Enter prompt");
+    return;
+  }
 
-result.innerHTML = "🖼 Creating image...";
+  alert("Sending image: " + prompt);
+  console.log("IMAGE PROMPT:", prompt);
 
+  try {
+    const res = await fetch(`${API}/image`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt })
+    });
 
-const res = await fetch("/image",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({prompt})
-});
+    console.log("IMAGE REQUEST SENT");
 
-const data = await res.json();
+    const data = await res.json();
 
+    alert("IMAGE RESPONSE: " + JSON.stringify(data));
 
-result.innerHTML = `
-<img src="${data.result}" width="100%">
-<br><br>
-<button onclick="openFile('${data.result}')">
-⬇ Open / Download Image
-</button>
-`;
+    const img = document.getElementById("image");
+    const video = document.getElementById("video");
 
+    video.style.display = "none";
+    img.style.display = "block";
+
+    img.src = data.result;
+
+  } catch (err) {
+    alert("IMAGE ERROR: " + err.message);
+    console.log(err);
+  }
 }
 
 
+// ================= VIDEO =================
+async function generateVideo() {
+  const prompt = document.getElementById("prompt").value.trim();
 
+  if (!prompt) {
+    alert("Enter prompt");
+    return;
+  }
 
+  alert("Sending video: " + prompt);
+  console.log("VIDEO PROMPT:", prompt);
 
-async function generateVideo(){
+  try {
+    const res = await fetch(`${API}/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt })
+    });
 
-const prompt = document.getElementById("prompt").value;
+    console.log("VIDEO REQUEST SENT");
 
-const result = document.getElementById("result");
+    const data = await res.json();
 
-result.innerHTML = "🎬 Creating video...";
+    alert("VIDEO RESPONSE: " + JSON.stringify(data));
 
+    const img = document.getElementById("image");
+    const video = document.getElementById("video");
 
-const res = await fetch("/generate",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({prompt})
-});
+    img.style.display = "none";
+    video.style.display = "block";
 
-const data = await res.json();
+    video.src = data.result;
 
-
-result.innerHTML = `
-<video controls width="100%">
-<source src="${data.result}" type="video/mp4">
-</video>
-<br><br>
-<button onclick="openFile('${data.result}')">
-⬇ Open / Download Video
-</button>
-`;
-
-}
-
-
-
-
-
-function openFile(url){
-
-window.open(url, "_blank");
-
+  } catch (err) {
+    alert("VIDEO ERROR: " + err.message);
+    console.log(err);
+  }
 }
