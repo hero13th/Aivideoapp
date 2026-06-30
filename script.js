@@ -1,79 +1,28 @@
-const API = "https://aivideoapp-wb8p.onrender.com";
+import express from "express";
+import cors from "cors";
 
-console.log("SCRIPT LOADED");
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-// ================= IMAGE =================
-async function generateImage() {
-  const prompt = document.getElementById("prompt").value.trim();
+app.get("/", (req, res) => {
+  res.send("AI SERVER RUNNING ✔");
+});
 
-  if (!prompt) {
-    alert("Enter a prompt");
-    return;
-  }
+app.post("/image", (req, res) => {
+  res.json({
+    result: "https://via.placeholder.com/512"
+  });
+});
 
-  document.getElementById("status").innerText = "Generating image...";
+app.post("/generate", (req, res) => {
+  res.json({
+    result: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
+  });
+});
 
-  try {
-    const res = await fetch(`${API}/image`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ prompt })
-    });
+const PORT = process.env.PORT || 10000;
 
-    const data = await res.json();
-    console.log("IMAGE RESPONSE:", data);
-
-    if (data.error) {
-      alert(data.error);
-      return;
-    }
-
-    document.getElementById("image").src = data.result;
-
-    document.getElementById("status").innerText = "Image ready ✔";
-
-  } catch (err) {
-    console.log(err);
-    alert("Image request failed");
-  }
-}
-
-// ================= VIDEO =================
-async function generateVideo() {
-  const prompt = document.getElementById("prompt").value.trim();
-
-  if (!prompt) {
-    alert("Enter a prompt");
-    return;
-  }
-
-  document.getElementById("status").innerText = "Generating video...";
-
-  try {
-    const res = await fetch(`${API}/generate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ prompt })
-    });
-
-    const data = await res.json();
-    console.log("VIDEO RESPONSE:", data);
-
-    if (data.error) {
-      alert(data.error);
-      return;
-    }
-
-    document.getElementById("video").src = data.result;
-
-    document.getElementById("status").innerText = "Video ready ✔";
-
-  } catch (err) {
-    console.log(err);
-    alert("Video request failed");
-  }
-}
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Server running on", PORT);
+});
