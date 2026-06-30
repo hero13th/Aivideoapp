@@ -8,22 +8,20 @@ app.use(cors());
 app.use(express.json());
 
 
-// Serve your app files
+// Serve index.html, style.css, script.js
 app.use(express.static(__dirname));
 
 
-// Open app
+// Home = actual app
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
 
-// Image test route
+// Image test
 app.post("/image", (req, res) => {
 
-  const prompt = req.body.prompt;
-
-  console.log("IMAGE PROMPT:", prompt);
+  console.log("IMAGE REQUEST:", req.body);
 
   res.json({
     result: "https://via.placeholder.com/512"
@@ -32,12 +30,10 @@ app.post("/image", (req, res) => {
 });
 
 
-// Video test route
+// Video test
 app.post("/generate", (req, res) => {
 
-  const prompt = req.body.prompt;
-
-  console.log("VIDEO PROMPT:", prompt);
+  console.log("VIDEO REQUEST:", req.body);
 
   res.json({
     result: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
@@ -49,5 +45,5 @@ app.post("/generate", (req, res) => {
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port", PORT);
+  console.log("Server running on port " + PORT);
 });
