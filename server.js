@@ -4,261 +4,102 @@ import dotenv from "dotenv";
 import Replicate from "replicate";
 import fs from "fs";
 
-
 dotenv.config();
-
 
 const app = express();
 
-
+// middleware
 app.use(cors());
 app.use(express.json());
 
-
+// static hosting
 app.use(express.static("."));
-app.use("/videos", express.static("videos"));
 app.use("/images", express.static("images"));
+app.use("/videos", express.static("videos"));
 
-
-
+// replicate setup
 const replicate = new Replicate({
-
-auth: process.env.REPLICATE_API_TOKEN
-
+  auth: process.env.REPLICATE_API_TOKEN
 });
 
 
+// ===================== IMAGE =====================
+app.post("/image", async (req, res) => {
+  try {
+    const prompt = req.body.prompt;
+    console.log("IMAGE PROMPT:", prompt);
 
+    const output = await replicate.run(
+      "black-forest-labs/flux-schnell",
+      {
+        input: { prompt }
+      }
+    );
 
+    const imageUrl = output[0];
 
-// VIDEO
+    const img = await fetch(imageUrl);
+    const buffer = Buffer.from(await img.arrayBuffer());
 
-app.post("/generate", async (req,res)=>{
+    if (!fs.existsSync("images")) fs.mkdirSync("images");
 
-try{
+    const fileName = `img_${Date.now()}.png`;
 
+    fs.writeFileSync(`images/${fileName}`, buffer);
 
-const prompt = req.body.prompt;
+    const result =
+      `https://aivideoapp-wb8p.onrender.com/images/${fileName}`;
 
+    console.log("IMAGE RESULT:", result);
 
-console.log("Video prompt:", prompt);
+    res.json({ result });
 
-console.log("Sending video to Replicate...");
-
-
-
-const output = await replicate.run(
-
-"bytedance/seedance-1-lite",
-
-{
-
-input:{
-
-prompt:prompt
-
-}
-
-}
-
-);
-
-
-
-const videoUrl = output.url().href;
-
-
-console.log("Downloading video...");
-
-
-
-const videoData = await fetch(videoUrl);
-
-const videoBuffer = Buffer.from(
-
-await videoData.arrayBuffer()
-
-);
-
-
-
-if(!fs.existsSync("videos")){
-
-fs.mkdirSync("videos");
-
-}
-
-
-fs.writeFileSync(
-
-"videos/video.mp4",
-
-videoBuffer
-
-);
-
-
-
-const result =
-
-"https://thehun-adjusted-political-thumb.trycloudflare.com/videos/video.mp4";
-
-
-
-console.log("VIDEO:", result);
-
-
-
-res.json({
-
-result:result
-
+  } catch (e) {
+    console.log("IMAGE ERROR:", e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 
+// ===================== VIDEO =====================
+app.post("/generate", async (req, res) => {
+  try {
+    const prompt = req.body.prompt;
+    console.log("VIDEO PROMPT:", prompt);
 
-}
+    const output = await replicate.run(
+      "bytedance/seedance-1-lite",
+      {
+        input: { prompt }
+      }
+    );
 
-catch(error){
+    const videoUrl = output[0];
 
+    const video = await fetch(videoUrl);
+    const buffer = Buffer.from(await video.arrayBuffer());
 
-console.log("VIDEO ERROR:", error.message);
+    if (!fs.existsSync("videos")) fs.mkdirSync("videos");
 
+    const fileName = `vid_${Date.now()}.mp4`;
 
-res.status(500).json({
+    fs.writeFileSync(`videos/${fileName}`, buffer);
 
-error:error.message
+    const result =
+      `https://aivideoapp-wb8p.onrender.com/videos/${fileName}`;
 
+    console.log("VIDEO RESULT:", result);
+
+    res.json({ result });
+
+  } catch (e) {
+    console.log("VIDEO ERROR:", e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 
-}
-
-
-});
-
-
-
-
-
-
-
-// IMAGE
-
-app.post("/image", async (req,res)=>{
-
-try{
-
-
-const prompt = req.body.prompt;
-
-
-console.log("Image prompt:", prompt);
-
-console.log("Sending image to Replicate...");
-
-
-
-const output = await replicate.run(
-
-"black-forest-labs/flux-schnell",
-
-{
-
-input:{
-
-prompt:prompt
-
-}
-
-}
-
-);
-
-
-
-const imageUrl = output[0];
-
-
-console.log("Downloading image...");
-
-
-
-const imageData = await fetch(imageUrl);
-
-
-const imageBuffer = Buffer.from(
-
-await imageData.arrayBuffer()
-
-);
-
-
-
-if(!fs.existsSync("images")){
-
-fs.mkdirSync("images");
-
-}
-
-
-
-fs.writeFileSync(
-
-"images/image.png",
-
-imageBuffer
-
-);
-
-
-
-const result =
-
-"https://thehun-adjusted-political-thumb.trycloudflare.com/images/image.png";
-
-
-
-console.log("IMAGE:", result);
-
-
-
-res.json({
-
-result:result
-
-});
-
-
-
-}
-
-catch(error){
-
-
-console.log("IMAGE ERROR:", error.message);
-
-
-res.status(500).json({
-
-error:error.message
-
-});
-
-
-}
-
-
-});
-
-
-
-
-
-app.listen(3000,"0.0.0.0",()=>{
-
-
-console.log("Server running on port 3000");
-
-
+// ===================== START SERVER =====================
+app.listen(3000, "0.0.0.0", () => {
+  console.log("Server running on port 3000");
 });
