@@ -2,34 +2,71 @@
 <html>
 
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Creator</title>
-  <link rel="stylesheet" href="style.css">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Creator</title>
+
+<link rel="stylesheet" href="style.css">
+
 </head>
+
 
 <body>
 
+
 <div class="app">
 
-  <div class="logo">🤖</div>
 
-  <h1>AI Creator</h1>
-  <p>Create images and videos with AI</p>
+<h1>🤖 AI Creator</h1>
 
-  <textarea id="prompt" placeholder="Describe your idea..."></textarea>
+<p>Create images and videos with AI</p>
 
-  <button onclick="generateImage()">🖼 Create Image</button>
-  <button onclick="generateVideo()">🎬 Create Video</button>
 
-  <p id="status">AI server running...</p>
+<textarea 
+id="prompt"
+placeholder="Describe your idea..."
+></textarea>
 
-  <img id="image" style="width:100%; margin-top:10px; display:block;" />
 
-  <video id="video" controls style="width:100%; margin-top:10px; display:block;"></video>
+
+<button onclick="generateImage()">
+🖼 Create Image
+</button>
+
+
+<button onclick="generateVideo()">
+🎬 Create Video
+</button>
+
+
+
+<h3>Image Result</h3>
+
+<img 
+id="image"
+style="width:100%;"
+/>
+
+
+
+<h3>Video Result</h3>
+
+<video
+id="video"
+controls
+style="width:100%;"
+></video>
+
+
 
 </div>
 
+
+
 <script src="script.js"></script>
 
+
 </body>
+
 </html>
