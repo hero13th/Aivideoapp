@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Creator</title>
   <link rel="stylesheet" href="style.css">
@@ -10,29 +9,27 @@
 
 <body>
 
-  <div class="app">
+<div class="app">
 
-    <h1>🤖 AI Creator</h1>
+  <div class="logo">🤖</div>
 
-    <textarea id="prompt" placeholder="Describe your idea..."></textarea>
+  <h1>AI Creator</h1>
+  <p>Create images and videos with AI</p>
 
-    <div class="buttons">
-      <button onclick="generateImage()">🖼 Generate Image</button>
-      <button onclick="generateVideo()">🎬 Generate Video</button>
-    </div>
+  <textarea id="prompt" placeholder="Describe your idea..."></textarea>
 
-    <div id="output">
+  <button onclick="generateImage()">🖼 Create Image</button>
+  <button onclick="generateVideo()">🎬 Create Video</button>
 
-      <img id="image" style="width:100%; display:none; border-radius:10px; margin-top:10px;" />
+  <p id="status">AI server running...</p>
 
-      <video id="video" controls style="width:100%; display:none; border-radius:10px; margin-top:10px;"></video>
+  <img id="image" style="width:100%; margin-top:10px; display:block;" />
 
-    </div>
+  <video id="video" controls style="width:100%; margin-top:10px; display:block;"></video>
 
-  </div>
+</div>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 
 </body>
-
 </html>

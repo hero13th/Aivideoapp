@@ -10,12 +10,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ================= HEALTH CHECK =================
+// ================= HOME =================
 app.get("/", (req, res) => {
-  res.send("AI Server is running ✔");
+  res.send("AI Server running ✔");
 });
 
-// ================= SAFE REPLICATE INIT =================
+// ================= REPLICATE INIT =================
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN || ""
 });
@@ -25,11 +25,11 @@ app.post("/image", async (req, res) => {
   try {
     const prompt = req.body.prompt;
 
-    if (!prompt) {
-      return res.status(400).json({ error: "No prompt provided" });
-    }
-
     console.log("IMAGE PROMPT:", prompt);
+
+    if (!prompt) {
+      return res.json({ error: "No prompt sent" });
+    }
 
     const output = await replicate.run(
       "black-forest-labs/flux-schnell",
@@ -42,13 +42,20 @@ app.post("/image", async (req, res) => {
 
     const imageUrl = Array.isArray(output) ? output[0] : output;
 
+    if (!imageUrl) {
+      return res.json({ error: "No image returned from AI" });
+    }
+
     return res.json({
       result: imageUrl
     });
 
   } catch (err) {
     console.log("IMAGE ERROR:", err.message);
-    return res.status(500).json({ error: err.message });
+
+    return res.json({
+      error: err.message
+    });
   }
 });
 
@@ -57,11 +64,11 @@ app.post("/generate", async (req, res) => {
   try {
     const prompt = req.body.prompt;
 
-    if (!prompt) {
-      return res.status(400).json({ error: "No prompt provided" });
-    }
-
     console.log("VIDEO PROMPT:", prompt);
+
+    if (!prompt) {
+      return res.json({ error: "No prompt sent" });
+    }
 
     const output = await replicate.run(
       "bytedance/seedance-1-lite",
@@ -74,14 +81,10 @@ app.post("/generate", async (req, res) => {
 
     let videoUrl = Array.isArray(output)
       ? output[0]
-      : typeof output === "string"
-      ? output
-      : null;
+      : output;
 
     if (!videoUrl) {
-      return res.status(500).json({
-        error: "No video URL returned"
-      });
+      return res.json({ error: "No video returned from AI" });
     }
 
     return res.json({
@@ -90,11 +93,14 @@ app.post("/generate", async (req, res) => {
 
   } catch (err) {
     console.log("VIDEO ERROR:", err.message);
-    return res.status(500).json({ error: err.message });
+
+    return res.json({
+      error: err.message
+    });
   }
 });
 
-// ================= START SERVER =================
+// ================= START =================
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, "0.0.0.0", () => {
